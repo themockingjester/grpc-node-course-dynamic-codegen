@@ -71,16 +71,72 @@ function sendMultipleGreeting() {
     let count = 0
     var request = {
         greeting: {
-            first_name: "Jerry",
+            first_name: "",
             last_name: "Tom"
         }
     }
+    let serverReturnedError = false
     let call = client.ReceiveMultipleGreetings(request, (error, response) => {
         if (!error) {
             console.log("Response: " + response.result);
         } else {
             console.log("Error: " + error);
+            serverReturnedError = true; 
         }
+    })
+    let intervalId = setInterval(() => {
+        var request = {
+            greeting: {
+                first_name: "",
+                last_name: "Tom"
+            }
+        }
+        
+        if(serverReturnedError==false){
+            call.write(request)
+
+        } else {
+            clearInterval(intervalId)
+            call.end()
+        }
+
+        if(serverReturnedError==false){
+            if (count > 10) {
+                clearInterval(intervalId)
+                call.end()
+            }
+            count++
+        }
+        
+    }, 500)
+
+
+
+    
+}
+// For client streaming demo
+function biDrirectionalStreaming() {
+    let count = 0
+    var request = {
+        greeting: {
+            first_name: "Jerry",
+            last_name: "Tom"
+        }
+    }
+    let call = client.biDirectionMultipleGreets(request, () => {
+    })
+
+    call.on('data', (response) => {
+        console.log("Client streaming response: " + response.result);
+    })
+    call.on('status', (status) => {
+        console.log(status);
+    })
+    call.on('error', (error) => {
+        console.error("Client streaming error: " + error);
+    })
+    call.on('end', (error) => {
+        console.error("Streamingg Ended");
     })
     let intervalId = setInterval(() => {
         var request = {
@@ -103,10 +159,10 @@ function sendMultipleGreeting() {
     
 }
 
-
 function main() {
     // callGreeting()
     // callMultipleGreeting()
-    sendMultipleGreeting()
+    // sendMultipleGreeting()
+    biDrirectionalStreaming()
 }
 main()

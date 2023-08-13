@@ -13,6 +13,8 @@ service GreetService {
     // Client Streaming API
     rpc ReceiveMultipleGreetings (stream GreetRequest) returns (GreetResponse);
 
+    // Bi Drectional Streaming API
+    rpc biDirectionMultipleGreets (stream GreetRequest) returns (stream SendManyGreetingsResponse);
 }
 
 
